@@ -1,16 +1,16 @@
-import React, {useState} from "react";
+import React from "react";
 import _ from "lodash";
 import LevelComponent from "./LevelComponent";
 
 // Process parse timeline segment level data
-const parseTimelineSegmentLevelProcess = ({segmentData, totalTrackLength}) => {
+const parseSegmentLevelProcess = ({segmentData, totalTrackLength}) => {
 	// Check valid segment
-	const validateSegment = (item) => 
+	const validateSegment = (item) =>
 		(item.id > 0) && 
 		(item.start >= 0 && item.start <= totalTrackLength) &&
 		(item.end >= 0 && item.end <= totalTrackLength) &&
-		(item.start < item.end)
-
+		(item.start <= item.end)
+		
 	// Convert data timeline to seperate level in array
 	const getTimelineSegmentLevel = segmentData  => {
 		if (!_.isArray(segmentData)) {
@@ -28,26 +28,28 @@ const parseTimelineSegmentLevelProcess = ({segmentData, totalTrackLength}) => {
 		// Move item from curent data to list result until curent data become empty
 		while (!_.isEmpty(segmentData)) {
 			let lastItemInLevel = segmentData.shift();
-			if (!_.isNil(lastItemInLevel)) {
-				// Add first item in separate level
-				timelineSegmentLevel[level] = [];
-				timelineSegmentLevel[level].push(lastItemInLevel);
-
-				// Check next item and add to list item of current level
-				segmentData.forEach(function(checkingItem, index, segmentData) {
-					if (lastItemInLevel.end < checkingItem.start) {
-						segmentData.splice(index, 1); 
-						if (!validateSegment(checkingItem)) {
-							return;
-						}
-						timelineSegmentLevel[level].push(checkingItem);
-						lastItemInLevel = checkingItem;
-					}
-				});
-
-				// Go to next level
-				level++;
+			if (_.isNil(lastItemInLevel) || !validateSegment(lastItemInLevel)) {
+				continue;
 			}
+
+			// Add first item in separate level
+			timelineSegmentLevel[level] = [];
+			timelineSegmentLevel[level].push(lastItemInLevel);
+
+			// Check next item and add to list item of current level
+			segmentData.forEach(function(checkingItem, index, segmentData) {
+				if (lastItemInLevel.end < checkingItem.start) {
+					segmentData.splice(index, 1); 
+					if (!validateSegment(checkingItem)) {
+						return;
+					}
+					timelineSegmentLevel[level].push(checkingItem);
+					lastItemInLevel = checkingItem;
+				}
+			});
+
+			// Go to next level
+			level++;
 		}
 
 		return timelineSegmentLevel;
@@ -60,7 +62,10 @@ const parseTimelineSegmentLevelProcess = ({segmentData, totalTrackLength}) => {
 
 // Assume all data is valid and sorted by start time
 const TimelineContainerComponent = ({segmentData, totalTrackLength}) => {
-	const parseProcess = parseTimelineSegmentLevelProcess({segmentData, totalTrackLength});
+	const parseProcess = parseSegmentLevelProcess({
+		segmentData: segmentData,
+		totalTrackLength: totalTrackLength
+	});
 	const timelineSegmentLevel = parseProcess.getTimelineSegmentLevel(segmentData);
 	if (_.isEmpty(timelineSegmentLevel)) {
 		return "";
