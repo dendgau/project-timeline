@@ -2,6 +2,18 @@ import React from "react";
 import _ from "lodash";
 import LevelComponent from "./LevelComponent";
 
+// Config global param
+const globalParams = {
+	totalTrackLength: 0
+};
+
+// Check valid segment
+const checkValidSegment = (item) => 
+	(item.id > 0) && 
+	(item.start >= 0 && item.start <= globalParams.totalTrackLength) &&
+	(item.end >= 0 && item.end <= globalParams.totalTrackLength) &&
+	(item.start < item.end)
+
 // Convert data timeline to seperate level in array
 const getTimelineSegmentByLevel = segmentData  => {
 	if (!_.isArray(segmentData)) {
@@ -27,8 +39,11 @@ const getTimelineSegmentByLevel = segmentData  => {
 			// Check next item and add to list item of current level
 			segmentData.forEach(function(checkingItem, index, segmentData) {
 				if (lastItemInLevel.end < checkingItem.start) {
+					segmentData.splice(index, 1); 
+					if (!checkValidSegment(checkingItem)) {
+						return;
+					}
 					timelineSegmentLevel[level].push(checkingItem);
-					segmentData.splice(index, 1);
 					lastItemInLevel = checkingItem;
 				}
 			});
@@ -43,6 +58,7 @@ const getTimelineSegmentByLevel = segmentData  => {
 
 // Assume all data is valid and sorted by start time
 const TimelineContainerComponent = ({segmentData, totalTrackLength}) => {
+	globalParams.totalTrackLength = totalTrackLength;
 	const timelineSegmentLevel = getTimelineSegmentByLevel(segmentData);
 	if (_.isEmpty(timelineSegmentLevel)) {
 		return "";
