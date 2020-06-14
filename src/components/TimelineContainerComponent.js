@@ -1,18 +1,32 @@
-import React from "react";
+import React, {useState} from "react";
 import _ from "lodash";
 import LevelComponent from "./LevelComponent";
 
 // Process parse timeline segment level data
-const parseSegmentLevelProcess = ({segmentData, totalTrackLength}) => {
-	// Check valid segment
-	const validateSegment = (item) =>
-		(item.id > 0) && 
-		(item.start >= 0 && item.start <= totalTrackLength) &&
-		(item.end >= 0 && item.end <= totalTrackLength) &&
-		(item.start <= item.end)
+const parseSegmentLevelProcess = ({segmentList, trackLength}) => {
+	const [segmentData, setSegmentDataState] = useState(segmentList);
+	const [totalTrackLength, setTotalTrackLengthState] = useState(trackLength);
+
+	// Check next segment is valid in same level
+	const validateNextSegmentInSameLevel = (current, next) =>
+		(current.end < next.start)
+
+	// Check is valid single segment item
+	const validateSegmentItem = (item) =>
+		_.isObject(item) &&
+		item.id > 0 && 
+		item.start >= 0 &&
+		item.end >= 0 &&
+		item.start <= totalTrackLength &&
+		item.end <= totalTrackLength &&
+		item.start <= item.end
+
+	// Check is valid list of segment item
+	const validateSegmentDataList = () =>
+		_.isArray(segmentData) && _.find(segmentData, validateSegmentItem);
 		
 	// Convert data timeline to seperate level in array
-	const getTimelineSegmentLevel = segmentData  => {
+	const getTimelineSegmentLevel = () => {
 		if (!_.isArray(segmentData)) {
 			return [];
 		}
@@ -28,7 +42,7 @@ const parseSegmentLevelProcess = ({segmentData, totalTrackLength}) => {
 		// Move item from curent data to list result until curent data become empty
 		while (!_.isEmpty(segmentData)) {
 			let lastItemInLevel = segmentData.shift();
-			if (_.isNil(lastItemInLevel) || !validateSegment(lastItemInLevel)) {
+			if (!validateSegmentItem(lastItemInLevel)) {
 				continue;
 			}
 
@@ -38,9 +52,9 @@ const parseSegmentLevelProcess = ({segmentData, totalTrackLength}) => {
 
 			// Check next item and add to list item of current level
 			segmentData.forEach(function(checkingItem, index, segmentData) {
-				if (lastItemInLevel.end < checkingItem.start) {
+				if (validateNextSegmentInSameLevel(lastItemInLevel, checkingItem)) {
 					segmentData.splice(index, 1); 
-					if (!validateSegment(checkingItem)) {
+					if (!validateSegmentItem(checkingItem)) {
 						return;
 					}
 					timelineSegmentLevel[level].push(checkingItem);
@@ -56,19 +70,24 @@ const parseSegmentLevelProcess = ({segmentData, totalTrackLength}) => {
 	}
 
 	return {
-		getTimelineSegmentLevel: getTimelineSegmentLevel
+		getTimelineSegmentLevel: getTimelineSegmentLevel,
+		validateSegmentDataList: validateSegmentDataList
 	}
 }
 
 // Assume all data is valid and sorted by start time
 const TimelineContainerComponent = ({segmentData, totalTrackLength}) => {
 	const parseProcess = parseSegmentLevelProcess({
-		segmentData: segmentData,
-		totalTrackLength: totalTrackLength
+		segmentList: segmentData,
+		trackLength: totalTrackLength
 	});
+	if (!parseProcess.validateSegmentDataList(segmentData)) {
+		return "The segments data is invalid. Please check it out again in sampleData.js file"
+	}
+
 	const timelineSegmentLevel = parseProcess.getTimelineSegmentLevel(segmentData);
 	if (_.isEmpty(timelineSegmentLevel)) {
-		return "";
+		return "Can not show timeline segment. There is something wrong in source code.";
 	}
 
 	return (

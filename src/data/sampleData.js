@@ -26,5 +26,13 @@ export const data = [
     start: 350,
     end: 500,
     id: 5 // overlaps with 4
+  },
+  {
+    start: null,
+    end: 500,
+
+  },
+  {
+    
   }
 ];
