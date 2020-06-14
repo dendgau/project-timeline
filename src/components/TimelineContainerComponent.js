@@ -12,18 +12,20 @@ const parseSegmentLevelProcess = ({segmentList, trackLength}) => {
 		(current.end < next.start)
 
 	// Check is valid single segment item
-	const validateSegmentItem = (item) =>
-		_.isObject(item) &&
-		item.id > 0 && 
-		item.start >= 0 &&
-		item.end >= 0 &&
-		item.start <= totalTrackLength &&
-		item.end <= totalTrackLength &&
-		item.start <= item.end
+	const checkIsInvalidSegmentItem = (item) =>
+		!(
+			_.isObject(item) &&
+			item.id > 0 && 
+			item.start >= 0 &&
+			item.end >= 0 &&
+			item.start <= totalTrackLength &&
+			item.end <= totalTrackLength &&
+			item.start <= item.end
+		)
 
 	// Check is valid list of segment item
 	const validateSegmentDataList = () =>
-		_.isArray(segmentData) && _.find(segmentData, validateSegmentItem);
+		_.isArray(segmentData) && !_.find(segmentData, checkIsInvalidSegmentItem);
 		
 	// Convert data timeline to seperate level in array
 	const getTimelineSegmentLevel = () => {
@@ -42,7 +44,7 @@ const parseSegmentLevelProcess = ({segmentList, trackLength}) => {
 		// Move item from curent data to list result until curent data become empty
 		while (!_.isEmpty(segmentData)) {
 			let lastItemInLevel = segmentData.shift();
-			if (!validateSegmentItem(lastItemInLevel)) {
+			if (checkIsInvalidSegmentItem(lastItemInLevel)) {
 				continue;
 			}
 
@@ -54,7 +56,7 @@ const parseSegmentLevelProcess = ({segmentList, trackLength}) => {
 			segmentData.forEach(function(checkingItem, index, segmentData) {
 				if (validateNextSegmentInSameLevel(lastItemInLevel, checkingItem)) {
 					segmentData.splice(index, 1); 
-					if (!validateSegmentItem(checkingItem)) {
+					if (checkIsInvalidSegmentItem(checkingItem)) {
 						return;
 					}
 					timelineSegmentLevel[level].push(checkingItem);
