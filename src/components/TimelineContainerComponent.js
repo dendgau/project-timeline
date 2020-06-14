@@ -8,7 +8,7 @@ const globalParams = {
 };
 
 // Check valid segment
-const checkValidSegment = (item) => 
+const validateSegment = (item) => 
 	(item.id > 0) && 
 	(item.start >= 0 && item.start <= globalParams.totalTrackLength) &&
 	(item.end >= 0 && item.end <= globalParams.totalTrackLength) &&
@@ -40,7 +40,7 @@ const getTimelineSegmentByLevel = segmentData  => {
 			segmentData.forEach(function(checkingItem, index, segmentData) {
 				if (lastItemInLevel.end < checkingItem.start) {
 					segmentData.splice(index, 1); 
-					if (!checkValidSegment(checkingItem)) {
+					if (!validateSegment(checkingItem)) {
 						return;
 					}
 					timelineSegmentLevel[level].push(checkingItem);
