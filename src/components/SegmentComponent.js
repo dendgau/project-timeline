@@ -1,5 +1,4 @@
 import React from "react";
-import _ from "lodash";
 
 const SegmentComponent = ({id, start, end, totalTrackLength}) => {
 	// Calculate position and width of segment in level with %

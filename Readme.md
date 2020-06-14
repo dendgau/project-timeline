@@ -2,6 +2,6 @@ The software team works on many tasks, each was estimated with some timelines, r
 Segments with overlapping timelines should be displayed in different rows. Segments with earlier starting times should be displayed in higher rows, for segments with the same starting times, ones with earlier end times should be displayed on higher rows.
 
 Sample data: sampleData.js
-Expected output for sample data: timeSegmentsNums.png
+Expected output for sample data: assets/images/timeSegmentsNums.png
 
 Host your solution to codesandbox.io and submit the link.

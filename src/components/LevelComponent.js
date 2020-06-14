@@ -11,7 +11,7 @@ const LevelComponent = ({segments, totalTrackLength}) => {
         <div className="level">
             {
                 segments.map((item, index) => 
-                    <SegmentComponent {...item} totalTrackLength={totalTrackLength}/>
+                    <SegmentComponent key={index} {...item} totalTrackLength={totalTrackLength}/>
                 )
             }
         </div>

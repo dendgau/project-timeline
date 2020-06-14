@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import _ from "lodash";
 import LevelComponent from "./LevelComponent";
 
@@ -53,7 +52,7 @@ const TimelineContainerComponent = ({segmentData, totalTrackLength}) => {
 		<div className="container">
 			{
 				timelineSegmentLevel.map((segments, index) => 
-					<LevelComponent segments={segments} totalTrackLength={totalTrackLength}/>
+					<LevelComponent key={index} segments={segments} totalTrackLength={totalTrackLength}/>
 				)
 			}
 		</div>
