@@ -81,11 +81,11 @@ const TimelineContainerComponent = ({segmentData, totalTrackLength}) => {
 		segmentList: segmentData,
 		trackLength: totalTrackLength
 	});
-	if (!parseProcess.validateSegmentDataList(segmentData)) {
+	if (!parseProcess.validateSegmentDataList()) {
 		return "The segments data is invalid. Please check it out again in sampleData.js file"
 	}
 
-	const timelineSegmentLevel = parseProcess.getTimelineSegmentLevel(segmentData);
+	const timelineSegmentLevel = parseProcess.getTimelineSegmentLevel();
 	if (_.isEmpty(timelineSegmentLevel)) {
 		return "Can not show timeline segment. There is something wrong in source code.";
 	}
