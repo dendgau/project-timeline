@@ -52,16 +52,22 @@ const parseSegmentLevelProcess = ({segmentList, trackLength}) => {
 			timelineSegmentLevel[level] = [];
 			timelineSegmentLevel[level].push(lastItemInLevel);
 
-			// Check next item and add to list item of current level
+			// Check valid item and add to current level
 			segmentData.forEach(function(checkingItem, index, segmentData) {
-				if (validateNextSegmentInSameLevel(lastItemInLevel, checkingItem)) {
-					segmentData.splice(index, 1); 
-					if (checkIsInvalidSegmentItem(checkingItem)) {
-						return;
-					}
-					timelineSegmentLevel[level].push(checkingItem);
-					lastItemInLevel = checkingItem;
+				// Check next segment start earlier than last segment in same level
+				if (!validateNextSegmentInSameLevel(lastItemInLevel, checkingItem)) {
+					return;
 				}
+
+				// Check segment is valid data
+				segmentData.splice(index, 1);
+				if (checkIsInvalidSegmentItem(checkingItem)) {
+					return;
+				}
+
+				// Add valid segment to level
+				timelineSegmentLevel[level].push(checkingItem);
+				lastItemInLevel = checkingItem;
 			});
 
 			// Go to next level
